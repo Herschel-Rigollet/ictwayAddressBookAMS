@@ -5,6 +5,7 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ page import="org.egovframe.rte.fdl.security.userdetails.util.EgovUserDetailsHelper" %>
 <%pageContext.setAttribute("crlf", "\r\n"); %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -21,24 +22,25 @@
 
 <script type="text/javascript">
 	//주소록 목록조회
-	function selectAdrList(){
-		document.searchListForm.action = "<c:url value='/ictway/kjk/selectAdrList.do'/>";
+	function selectAdrPSPList(){
+		document.searchListForm.action = "<c:url value='/ictway/psp/selectAdrPSPList.do'/>";
 		document.searchListForm.submit();
 	}
 	
 	//주소록 수정 화면
-	function selectAdrUpdate(){
-		document.searchListForm.action = "<c:url value='/ictway/kjk/selectAdrUpdate.do'/>";
+	function selectAdrPSPUpdate(adbkSn){
+		document.searchListForm.adbkSn.value = adbkSn;
+		document.searchListForm.action = "<c:url value='/ictway/psp/selectAdrPSPUpdate.do'/>";
 		document.searchListForm.submit();
 	}
 	
 	//주소록 정보 삭제
-	function deleteAdrAct(){
+	function deleteAdrPSPAct(){
 		if (confirm('<spring:message code="common.delete.msg" />')) {
     		const formElement = document.searchListForm;
         	const formData = new FormData(formElement);
         	
-        	fetch("<c:url value='/ictway/kjk/deleteAdrAct.do'/>",{
+        	fetch("<c:url value='/ictway/psp/deleteAdrPSPAct.do'/>",{
     			method: "POST",
     			cache: "no-cache",
      			headers: {},
@@ -47,7 +49,7 @@
         	.then(response => response.json())
         	.then(data => {
         		alert("<spring:message code="success.common.delete"/>");
-        		location.href = "<c:url value='/ictway/kjk/selectAdrList.do'/>";
+        		location.href = "<c:url value='/ictway/psp/selectAdrPSPList.do'/>";
         	})
         	.catch(error => {
     			console.log(error);
@@ -56,9 +58,29 @@
     	}
 	}
 	
+	function registBkmkAdrPSPAct(){
+		var usrId = '<c:out value = "${EgovUserDetailsHelper.getAuthenticatedUser().uniqId}"/>';
+		var adbkSn = '<c:out value="${resultVO.adbkSn}"/>';
+		
+		
+		
+		fetch("<c:url value='/ictway/psp/registBkmkAdrPSPAct.do'/>",{
+			method: "POST",
+			cache: "no-cache",
+ 			headers: {},
+ 			body: formData
+		}).catch(error => {
+			console.log(error);
+			alert("에러가 발생하였습니다.");
+		});
+	}
+	
+ 	
+	
+	
 </script>
 
-<title>샘플 포털 > 주소록 > 김진광</title>
+<title>샘플 포털 > 주소록 > 현승민</title>
 
 <style type="text/css">
 	h1 {font-size:12px;}
@@ -93,8 +115,8 @@
                                     <ul>
                                         <li><a class="home" href="<c:url value="/"/>">Home</a></li>
 										<li><a href="javascript:void(0);">주소록</a></li>
-										<li><a href="<c:url value="/ictway/psp/selectAdrList.do"/>">현승민</a></li>
-										<li><a href="<c:url value="/ictway/psp/selectAdrList.do"/>">주소록 목록</a></li>
+										<li><a href="<c:url value="/ictway/psp/selectAdrPSPList.do"/>">현승민</a></li>
+										<li><a href="<c:url value="/ictway/psp/selectAdrPSPList.do"/>">주소록 목록</a></li>
 										<li><a href="javascript:void(0);">주소록 상세</a></li>
                                     </ul>
                                 </div>
@@ -106,7 +128,7 @@
 									<form:hidden path="searchCondition"/>
 									<form:hidden path="searchKeyword"/>
 									
-									<form:hidden path="adrId"/>
+									<form:hidden path="adbkSn"/>
 								</form:form>
 								<!-- 검색 form 끝 -->
 
@@ -117,32 +139,208 @@
                                 <!-- 주소록 상세보기 -->
                                 <div class="board_view">
                                     <div class="board_view_top">
-                                        <div class="tit"><c:out value="${resultVO.adrSj}" /></div>
+                                        <div class="tit"><c:out value="${resultVO.userNm}" /></div>
                                         <div class="info">
                                             <dl>
                                                 <dt>등록자</dt>
-                                                <dd><c:out value="${resultVO.frstRegisterNm}" /></dd>
+                                                <dd><c:out value="${resultVO.registUserNm}" /></dd>
                                             </dl>
                                             <dl>
                                                 <dt>등록일</dt>
-                                                <dd><c:out value="${resultVO.frstRegistPnttm}" /></dd>
+                                             
+                                                
+                                                <fmt:parseDate value ="${resultVO.registDt}" pattern = "yyyy-MM-dd" var = "date"/>
+												<fmt:formatDate value="${date}" pattern="yyyy년 MM월 dd일"/>
+                                            </dl>
+                                            
+                                            <dl>
+                                                <dt>수정일</dt>
+                                                
+                                                <fmt:parseDate value ="${resultVO.updtDt}" pattern = "yyyy-MM-dd" var = "date"/>
+												<fmt:formatDate value="${date}" pattern="yyyy년 MM월 dd일"/>
+
                                             </dl>
                                         </div>
                                     </div>
-
-                                    <div class="board_article">
-                                    	<c:out value="${fn:replace(resultVO.adrCn , crlf , '<br/>')}" escapeXml="false" />
+                                    
+                                    <div class="board_view2">
+                                    <table>
+										<colgroup>
+	                                    	<col style="width: 190px;">
+	                                        <col style="width: auto;">
+	                                    </colgroup>
+	                                   
+	                                   
+	                                    <tr>
+	                                    	<td class="lb">
+	                                        	<label for="brthdy">생년월일</label>
+	                                           	
+	                                        </td>
+	                                        
+	                                        <td>
+	                                        	<div id="brthdy", name="brthdy">
+		                                    	<fmt:parseDate value ="${resultVO.brthdy}" pattern = "yyyyMMdd" var = "date"/>
+												<fmt:formatDate value="${date}" pattern="yyyy-MM-dd"/>
+		                                    	</div>
+	                                        </td>
+	                                    </tr>
+	                                    
+	                                    <tr>
+	                                    	<td class="lb">
+	                                        	<label for="sexdstnCode">성별</label>
+	                                           	
+	                                        </td>
+	                                        
+	                                        <td>
+	                                        	<div id="sexdstnCode", name="sexdstnCode">
+		                                    	<c:choose>
+											        <c:when test="${resultVO.sexdstnCode == '0'}">
+											            <c:out value="남자" escapeXml="false" />
+											        </c:when>
+											        <c:when test="${resultVO.sexdstnCode == '1'}">
+											            <c:out value="여자" escapeXml="false" />
+											        </c:when>
+											        <c:otherwise>
+											            <!-- 다른 값이 올 경우에 대한 처리 -->
+											            <c:out value="${resultVO.sexdstnCode}" />
+											        </c:otherwise>
+											    </c:choose>
+		                                    	</div>
+	                                        </td>
+	                                    </tr>
+	                                    
+	                                    <tr>
+	                                    	<td class="lb">
+	                                        	<label for="adres">주소</label>
+	                                           	
+	                                        </td>
+	                                        
+	                                        <td>
+	                                        	<div id="adres", name="adres">
+		                                    	<c:out value="${fn:replace(resultVO.adres , crlf , '<br/>')}" escapeXml="false" />
+		                                    	</div>
+	                                        </td>
+	                                    </tr>
+	                                    
+	                                    <tr>
+	                                    	<td class="lb">
+	                                        	<label for="detailAdres">상세주소</label>
+	                                           	
+	                                        </td>
+	                                        
+	                                        <td>
+	                                        	<div id=detailAdres, name="detailAdres">
+		                                    	<c:out value="${fn:replace(resultVO.detailAdres , crlf , '<br/>')}" escapeXml="false" />
+		                                    	</div>
+	                                        </td>
+	                                    </tr>
+	                                    
+	                                    <tr>
+	                                    	<td class="lb">
+	                                        	<label for="moblphonNo">휴대전화 번호</label>
+	                                           	
+	                                        </td>
+	                                        
+	                                        <td>
+	                                        	<div id="moblphonNo", name="moblphonNo">
+		                                    	
+		                                    	</div>
+	                                        </td>
+	                                    </tr>
+	                                    
+	                                    <tr>
+	                                    	<td class="lb">
+	                                        	<label for="emailaddr">이메일</label>
+	                                           	
+	                                        </td>
+	                                        
+	                                        <td>
+	                                        	<div id="emailaddr", name="emailaddr">
+		                                    	<c:out value="${fn:replace(resultVO.emailaddr , crlf , '<br/>')}" escapeXml="false" />
+		                                    	</div>
+	                                        </td>
+	                                    </tr>
+	                                    
+	                                    <tr>
+	                                    	<td class="lb">
+	                                        	<label for="memo">메모</label>
+	                                           	
+	                                        </td>
+	                                        
+	                                        <td>
+	                                        	<div id="memo", name="memo">
+	                                    			<c:out value="${fn:replace(resultVO.memo , crlf , '<br/>')}" escapeXml="false" />
+		                                    	</div>
+	                                        </td>
+	                                    </tr>
+	                                    
+	                                    <tr>
+	                                    	<td class="lb">
+	                                        	<label for="cmpnyNm">회사명칭</label>
+	                                           	
+	                                        </td>
+	                                        
+	                                        <td>
+	                                        	<div id="cmpnyNm", name=cmpnyNm>
+		                                    	<c:out value="${fn:replace(resultVO.cmpnyNm , crlf , '<br/>')}" escapeXml="false" />
+		                                    	</div>
+	                                        </td>
+	                                    </tr>
+	                                    
+	                                    <tr>
+	                                    	<td class="lb">
+	                                        	<label for="deptNm">부서명칭</label>
+	                                           	
+	                                        </td>
+	                                        
+	                                        <td>
+	                                        	<div id="deptNm", name="deptNm">
+		                                    	<c:out value="${fn:replace(resultVO.deptNm , crlf , '<br/>')}" escapeXml="false" />
+		                                    	</div>
+	                                        </td>
+	                                    </tr>
+	                                    
+	                                    <tr>
+	                                    	<td class="lb">
+	                                        	<label for="clsfNm">직급명칭</label>
+	                                           	
+	                                        </td>
+	                                        
+	                                        <td>
+	                                        	<div id="clsfNm", name="clsfNm">
+		                                    	<c:out value="${fn:replace(resultVO.clsfNm , crlf , '<br/>')}" escapeXml="false" />
+		                                    	</div>
+	                                        </td>
+	                                    </tr>
+	                                    
+	                                    <tr>
+	                                    	<td class="lb">
+	                                        	<label for="photo">사진</label>
+	                                           	
+	                                        </td>
+	                                        
+	                                        <td>
+	                                        	<div id="photo", name="photo">
+		                                    	<img src='<c:url value='/ictway/psp/getImage.do'/>?adbkSn=<c:out value="${resultVO.adbkSn}"/>' alt="파일보기링크" style="width:500px; height:300px" />
+		                                    	</div>
+	                                        </td>
+	                                    </tr>
+                                    
+                                    </table>
                                     </div>
-
 									<!-- 버튼 시작 -->
                                     <div class="board_view_bot">
                                         <div class="left_col btn3">
-                                            <a href="javascript:void(0);" class="btn btn_skyblue_h46 w_100" onclick="selectAdrUpdate();">수정</a>
-                                            <a href="javascript:void(0);" class="btn btn_skyblue_h46 w_100" onclick="deleteAdrAct();">삭제</a>
+                                            <c:if test="${(EgovUserDetailsHelper.getAuthenticatedUser().uniqId eq resultVO.usrId) || fn:contains(EgovUserDetailsHelper.getAuthorities(), 'ROLE_ADMIN')}">
+                                        
+                                            	<a href="javascript:void(0);" class="btn btn_skyblue_h46 w_100" onclick="selectAdrPSPUpdate('<c:out value="${resultVO.adbkSn}"/>'); return false;">수정</a>
+                                            	<a href="javascript:void(0);" class="btn btn_skyblue_h46 w_100" onclick="deleteAdrPSPAct();">삭제</a>
+                                           	</c:if>
+                                           	<a href="javascript:void(0);" class="btn btn_skyblue_h46 w_100" onclick="registBkmkAdrPSPAct();">즐겨찾기</a> 	
                                         </div>
 
                                         <div class="right_col btn1">
-                                            <a href="javascript:void(0);" class="btn btn_blue_46 w_100" onclick="selectAdrList();">목록</a>
+                                            <a href="javascript:void(0);" class="btn btn_blue_46 w_100" onclick="selectAdrPSPList();">목록</a>
                                         </div>
                                     </div>
                                     <!-- /버튼 끝 -->
@@ -162,4 +360,33 @@
     </div>
     
 </body>
+<script>
+	function phoneFormatter() {
+			const num = "<c:out value="${resultVO.moblphonNo}"/>";
+			var formatNum = '';
+			try{
+				if (num.length == 11) {
+					formatNum = num.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+				} else if (num.length == 8) {
+					formatNum = num.replace(/(\d{4})(\d{4})/, '$1-$2');
+				} else {
+					if (num.indexOf('02') == 0) {
+						formatNum = num.replace(/(\d{2})(\d{4})(\d{4})/, '$1-$2-$3');
+					} else {
+						formatNum = num.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+					}
+				}
+			} catch(e) {
+				formatNum = num;
+			}
+			
+			document.getElementById("moblphonNo").innerHTML= formatNum;
+	
+		} 
+	 	
+	 	
+		
+		phoneFormatter();
+	
+	</script>
 </html>

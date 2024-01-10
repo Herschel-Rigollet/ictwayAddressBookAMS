@@ -33,8 +33,8 @@ public class AdrPSPServiceImpl implements AdrPSPService {
 	@Resource(name = "adrPSPDAO")
     private AdrPSPDAO AdrPSPDAO;
 	
-	/** kjk-adrIdGnrService */
-	@Resource(name="kjk-adrIdGnrService")
+	/** psp-adrIdGnrService */
+	@Resource(name="psp-adrPSPIdGnrService")
 	private EgovIdGnrService idgenService;
 	
 	@Override
@@ -67,6 +67,7 @@ public class AdrPSPServiceImpl implements AdrPSPService {
 		
 		LoginVO user = (LoginVO) EgovUserDetailsHelper.getAuthenticatedUser();
 		AdrPSPVO.setUsrId(user.getUniqId());
+		AdrPSPVO.setRegistUserNm(user.getName());
 		
 		AdrPSPDAO.insertAdrPSPAct(AdrPSPVO);
 		return uniqId;
@@ -77,6 +78,7 @@ public class AdrPSPServiceImpl implements AdrPSPService {
 		//로그인 유저 이름
 		LoginVO user = (LoginVO) EgovUserDetailsHelper.getAuthenticatedUser();
 		AdrPSPVO.setUsrId(user.getUniqId());
+		AdrPSPVO.setRegistUserNm(user.getName());
 		AdrPSPDAO.updateAdrPSPAct(AdrPSPVO);
 	}
 

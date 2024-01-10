@@ -34,37 +34,24 @@
 
 
 	<select id="selectAdrCIPList" parameterType="egovframework.ictway.kyw.service.AdrCIPVO" resultType="egovMap">
-		SELECT
-			 adbk_id
-			,nm
-			,brthdy
-			,sexdstn_code
-			,adres
-			,detail_adres
-			,telno
-			,emailaddr
-			,memo
-			,photo_flpth
-			,photo_nm
-			,photo_extsn_nm
-			,group_code
-			,cmpny_psitn_nm
-			,cmpny_psitn_team_nm
-			,cmpny_psitn_clsf_nm
-			,bkmk_at
-			,adbk_frst_writng_dt
-			,adbk_frst_wrter_id
-			,adbk_frst_wrter_nm
-			,adbk_last_updt_dt
-			,adbk_last_updusr_id
-			,adbk_last_updusr_nm
-			,adbk_delete_at
-			,adbk_delete_dt
-			,adbk_dltr_id
-			,adbk_dltr_nm
+		SELECT *
 		FROM kyw.address_info
-		WHERE 
-		ORDER BY 1 DESC
+		WHERE adbk_delete_at = 'N'
+			<if test="searchKeyword != null and searchKeyword != ''"> 
+				<if test="searchCondition == 0">
+					AND nm LIKE '%'||REPLACE(UPPER(#{searchKeyword}),' ','')||'%'
+				</if>
+				<if test="searchCondition == 1">
+					AND brthdy LIKE '%'||REPLACE(UPPER(#{searchKeyword}),' ','')||'%'
+				</if>
+				<if test="searchCondition == 2">
+					AND telno LIKE '%'||REPLACE(UPPER(#{searchKeyword}),' ','')||'%'
+				</if>
+				<if test="searchCondition == 3">
+					AND emailaddr LIKE '%'||REPLACE(LOWER(#{searchKeyword}),' ','')||'%'
+				</if>
+			</if>
+		ORDER BY adbk_id DESC
 		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
 	</select>
 
@@ -73,16 +60,21 @@
 		SELECT
 			COUNT(*)
 		FROM kyw.address_info
-		<trim prefix="WHERE" prefixOverrides="AND |OR">
-			<if test="searchKeyword != null and searchKeyword != ''">
+		WHERE adbk_delete_at = 'N'
+			<if test="searchKeyword != null and searchKeyword != ''"> 
 				<if test="searchCondition == 0">
 					AND nm LIKE '%'||REPLACE(UPPER(#{searchKeyword}),' ','')||'%'
 				</if>
 				<if test="searchCondition == 1">
+					AND brthdy LIKE '%'||REPLACE(UPPER(#{searchKeyword}),' ','')||'%'
+				</if>
+				<if test="searchCondition == 2">
 					AND telno LIKE '%'||REPLACE(UPPER(#{searchKeyword}),' ','')||'%'
 				</if>
+				<if test="searchCondition == 3">
+					AND emailaddr LIKE '%'||REPLACE(LOWER(#{searchKeyword}),' ','')||'%'
+				</if>
 			</if>
-		</trim>
 	</select>
 
 
@@ -105,16 +97,12 @@
 			,cmpny_psitn_team_nm
 			,cmpny_psitn_clsf_nm
 			,bkmk_at
-			,adbk_frst_writng_dt
+			,to_char(adbk_frst_writng_dt, 'yyyy-mm-dd') AS adbk_frst_writng_dt
 			,adbk_frst_wrter_id
-			,adbk_frst_wrter_nm
-			,adbk_last_updt_dt
+			,to_char(adbk_last_updt_dt, 'yyyy-mm-dd') AS adbk_last_updt_dt
 			,adbk_last_updusr_id
-			,adbk_last_updusr_nm
-			,adbk_delete_at
-			,adbk_delete_dt
-			,adbk_dltr_id
-			,adbk_dltr_nm
+			,(SELECT user_nm FROM comvnusermaster WHERE esntl_id = adbk_frst_wrter_id) AS adbk_frst_wrter_nm
+			,(SELECT user_nm FROM comvnusermaster WHERE esntl_id = adbk_last_updusr_id) AS adbk_last_updusr_nm
 		FROM kyw.address_info
 		WHERE
 			adbk_delete_at = 'N'
@@ -122,7 +110,7 @@
 	</select>
 
 
-	<insert id="insertAdrCIPAct" parameterType="egovframework.ictway.kyw.service.AdrCIPVO">
+	<insert id="registAdrCIPAct" parameterType="egovframework.ictway.kyw.service.AdrCIPVO">
 		INSERT INTO kyw.address_info (
 			 adbk_id
 			,nm
@@ -141,20 +129,11 @@
 			,cmpny_psitn_team_nm
 			,cmpny_psitn_clsf_nm
 			,bkmk_at
-			,adbk_frst_writng_dt
 			,adbk_frst_wrter_id
-			,adbk_frst_wrter_nm
-			,adbk_last_updt_dt
-			,adbk_last_updusr_id
-			,adbk_last_updusr_nm
-			,adbk_delete_at
-			,adbk_delete_dt
-			,adbk_dltr_id
-			,adbk_dltr_nm
 		) VALUES(
 			 #{adbkId}
 			,#{nm}
-			,#{brthdy}
+			,replace(#{brthdy},'-','')
 			,#{sexdstnCode}
 			,#{adres}
 			,#{detailAdres}
@@ -169,16 +148,7 @@
 			,#{cmpnyPsitnTeamNm}
 			,#{cmpnyPsitnClsfNm}
 			,#{bkmkAt}
-			,#{adbkFrstWritngDt}
 			,#{adbkFrstWrterId}
-			,#{adbkFrstWrterNm}
-			,#{adbkLastUpdtDt}
-			,#{adbkLastUpdusrId}
-			,#{adbkLastUpdusrNm}
-			,#{adbkDeleteAt}
-			,#{adbkDeleteDt}
-			,#{adbkDltrId}
-			,#{adbkDltrNm}
 		)
 	</insert>
 
@@ -188,7 +158,7 @@
 		SET 
 			 adbk_id = #{adbkId}
 			,nm = #{nm}
-			,brthdy = #{brthdy}
+			,brthdy = replace(#{brthdy},'-','')
 			,sexdstn_code = #{sexdstnCode}
 			,adres = #{adres}
 			,detail_adres = #{detailAdres}
@@ -203,26 +173,18 @@
 			,cmpny_psitn_team_nm = #{cmpnyPsitnTeamNm}
 			,cmpny_psitn_clsf_nm = #{cmpnyPsitnClsfNm}
 			,bkmk_at = #{bkmkAt}
-			,adbk_frst_writng_dt = #{adbkFrstWritngDt}
-			,adbk_frst_wrter_id = #{adbkFrstWrterId}
-			,adbk_frst_wrter_nm = #{adbkFrstWrterNm}
-			,adbk_last_updt_dt = #{adbkLastUpdtDt}
+			,adbk_last_updt_dt = now()
 			,adbk_last_updusr_id = #{adbkLastUpdusrId}
-			,adbk_last_updusr_nm = #{adbkLastUpdusrNm}
-			,adbk_delete_at = #{adbkDeleteAt}
-			,adbk_delete_dt = #{adbkDeleteDt}
-			,adbk_dltr_id = #{adbkDltrId}
-			,adbk_dltr_nm = #{adbkDltrNm}
 		WHERE
 			adbk_delete_at = 'N'
 			AND adbk_id = #{adbkId}
-	</update>
+	</update> 
 	
 	
 	<update id="deleteAdrCIPAct" parameterType="egovframework.ictway.kyw.service.AdrCIPVO">
 		UPDATE kyw.address_info
-		SET 
-			 adbk_delete_at = 'N'
+		SET
+			 adbk_delete_at = 'Y'
 			,adbk_delete_dt = now()
 			,adbk_last_updusr_id = #{adbkLastUpdusrId}
 		WHERE

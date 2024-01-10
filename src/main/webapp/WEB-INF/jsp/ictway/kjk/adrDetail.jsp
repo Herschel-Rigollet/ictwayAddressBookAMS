@@ -5,6 +5,9 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<%@ page import="org.egovframe.rte.fdl.security.userdetails.util.EgovUserDetailsHelper" %>
+
 <%pageContext.setAttribute("crlf", "\r\n"); %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -37,6 +40,8 @@
 		if (confirm('<spring:message code="common.delete.msg" />')) {
     		const formElement = document.searchListForm;
         	const formData = new FormData(formElement);
+        	
+        	formData.set("__CSRF", "<c:out value="${__CSRF_TOKEN__}"/>"); //위조요청 방지
         	
         	fetch("<c:url value='/ictway/kjk/deleteAdrAct.do'/>",{
     			method: "POST",
@@ -136,11 +141,12 @@
 
 									<!-- 버튼 시작 -->
                                     <div class="board_view_bot">
+                                    <c:if test="${(EgovUserDetailsHelper.getAuthenticatedUser().uniqId eq resultVO.frstRegisterId) || fn:contains(EgovUserDetailsHelper.getAuthorities(), 'ROLE_ADMIN')}">
                                         <div class="left_col btn3">
                                             <a href="javascript:void(0);" class="btn btn_skyblue_h46 w_100" onclick="selectAdrUpdate();">수정</a>
                                             <a href="javascript:void(0);" class="btn btn_skyblue_h46 w_100" onclick="deleteAdrAct();">삭제</a>
                                         </div>
-
+                                     </c:if>
                                         <div class="right_col btn1">
                                             <a href="javascript:void(0);" class="btn btn_blue_46 w_100" onclick="selectAdrList();">목록</a>
                                         </div>

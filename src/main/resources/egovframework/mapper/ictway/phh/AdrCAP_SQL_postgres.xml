@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="AdrCIYDAO">
-	<resultMap id="adrCIYVO" type="package..AdrCIYVO">
+<mapper namespace="AdrCAPDAO">
+	<resultMap id="adrCAPDAO" type="egovframework.ictway.phh.service.AdrCAPVO">
 		<result property="adbkId" column="adbk_id"/>	<!-- 주소록번호 -->
 		<result property="userNm" column="user_nm"/>	<!-- 사용자명칭 -->
 		<result property="brthdy" column="brthdy"/>	<!-- 생년월일 -->
@@ -28,10 +28,12 @@
 		<result property="adbkDeleteDt" column="adbk_delete_dt"/>	<!-- 주소록삭제일시 -->
 		<result property="adbkDeleteAt" column="adbk_delete_at"/>	<!-- 주소록삭제여부 -->
 	</resultMap>
-	<!-- TODO: 리스트는 간략한 정보만 불러오도록 수정  -->
-	<select id="selectAdrCIYList" parameterType="package..AdrCIYVO" resultType="egovMap">
+
+
+
+	<select id="selectAdrCAPList" parameterType="egovframework.ictway.phh.service.AdrCAPVO" resultType="egovMap">
 		SELECT
-			adbk_id
+			 adbk_id
 			,user_nm
 			,brthdy
 			,sexdstn_code
@@ -40,9 +42,9 @@
 			,mbtlnum
 			,emailaddr
 			,memo
-			,photo_flpth
+			<!-- ,photo_flpth
 			,photo_file_nm
-			,photo_extsn_nm
+			,photo_extsn_nm -->
 			,adres_group_code
 			,cmpny_nm
 			,cmpny_team_nm
@@ -55,22 +57,27 @@
 			,adbk_dltr_id
 			,adbk_delete_dt
 			,adbk_delete_at
-		FROM yjh.address_info
-		WHERE adbk_wrter_id == #{adbkWrterId}
+		FROM phh.address_info
+ 		WHERE adbk_delete_at = 'N'
+			
 		ORDER BY 1 DESC
 		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
 	</select>
 
-	<select id="selectAdrCIYListCnt" parameterType="package..AdrCIYVO" resultType="java.lang.Integer">
+
+
+	<select id="selectAdrCAPListCnt" parameterType="egovframework.ictway.phh.service.AdrCAPVO" resultType="java.lang.Integer">
 		SELECT
 			COUNT(*)
-		FROM yjh.address_info
-		WHERE adbk_wrter_id == #{adbkWrterId}
+		FROM phh.address_info
+ 		WHERE adbk_delete_at = 'N'
 	</select>
 
-	<select id="selectAdrCIYDetail" parameterType="package..AdrCIYVO" resultMap="adrCIYVO">
+
+
+	<select id="selectAdrCAPDetail" parameterType="egovframework.ictway.phh.service.AdrCAPVO" resultMap="adrCAPDAO">
 		SELECT
-			adbk_id
+			 adbk_id
 			,user_nm
 			,brthdy
 			,sexdstn_code
@@ -79,28 +86,33 @@
 			,mbtlnum
 			,emailaddr
 			,memo
-			,photo_flpth
+			<!-- ,photo_flpth
 			,photo_file_nm
-			,photo_extsn_nm
+			,photo_extsn_nm -->
 			,adres_group_code
 			,cmpny_nm
 			,cmpny_team_nm
 			,cmpny_clsf_nm
 			,bkmk_at
-			,adbk_creat_dt
+			<!-- ,adbk_creat_dt -->
+			,TO_CHAR(adbk_creat_dt,  'YYYY-MM-DD HH24:mm:ss') AS adbk_creat_dt
+			
 			,adbk_wrter_id
 			,adbk_updt_dt
 			,adbk_updusr_id
 			,adbk_dltr_id
 			,adbk_delete_dt
 			,adbk_delete_at
-		FROM yjh.address_info
-		WHERE adbk_wrter_id == #{adbkWrterId}
+		FROM phh.address_info
+ 		WHERE adbk_id = #{adbkId}
+ 		AND adbk_delete_at = 'N'
 	</select>
 
-	<insert id="insertAdrCIYAct" parameterType="package..AdrCIYVO">
-		INSERT INTO yjh.address_info (
-			adbk_id
+
+
+	<insert id="insertAdrCAPAct" parameterType="egovframework.ictway.phh.service.AdrCAPVO">
+		INSERT INTO phh.address_info (
+			 adbk_id
 			,user_nm
 			,brthdy
 			,sexdstn_code
@@ -109,9 +121,9 @@
 			,mbtlnum
 			,emailaddr
 			,memo
-			,photo_flpth
+			<!-- ,photo_flpth
 			,photo_file_nm
-			,photo_extsn_nm
+			,photo_extsn_nm -->
 			,adres_group_code
 			,cmpny_nm
 			,cmpny_team_nm
@@ -119,13 +131,13 @@
 			,bkmk_at
 			,adbk_creat_dt
 			,adbk_wrter_id
-			,adbk_updt_dt
+			<!-- ,adbk_updt_dt -->
 			,adbk_updusr_id
 			,adbk_dltr_id
-			,adbk_delete_dt
+			<!-- ,adbk_delete_dt -->
 			,adbk_delete_at
 		) VALUES(
-			,#{adbkId}
+			 #{adbkId}
 			,#{userNm}
 			,#{brthdy}
 			,#{sexdstnCode}
@@ -134,28 +146,30 @@
 			,#{mbtlnum}
 			,#{emailaddr}
 			,#{memo}
-			,#{photoFlpth}
+			<!-- ,#{photoFlpth}
 			,#{photoFileNm}
-			,#{photoExtsnNm}
+			,#{photoExtsnNm} -->
 			,#{adresGroupCode}
 			,#{cmpnyNm}
 			,#{cmpnyTeamNm}
 			,#{cmpnyClsfNm}
 			,#{bkmkAt}
-			,#{adbkCreatDt}
-			,#{adbkWrterId}
-			,#{adbkUpdtDt}
-			,#{adbkUpdusrId}
-			,#{adbkDltrId}
-			,#{adbkDeleteDt}
-			,#{adbkDeleteAt}
+			,NOW()
+			,1
+			<!-- ,2 -->
+			,3
+			,4
+			<!-- ,5 -->
+			,'N'
 		)
 	</insert>
 
-	<update id="updateAdrCIYAct" parameterType="package..AdrCIYVO">
-		UPDATE yjh.address_info
+
+
+	<update id="updateAdrCAPAct" parameterType="egovframework.ictway.phh.service.AdrCAPVO">
+		UPDATE phh.address_info
 		SET 
-			adbk_id = #{adbkId}
+			 adbk_id = #{adbkId}
 			,user_nm = #{userNm}
 			,brthdy = #{brthdy}
 			,sexdstn_code = #{sexdstnCode}
@@ -179,6 +193,7 @@
 			,adbk_dltr_id = #{adbkDltrId}
 			,adbk_delete_dt = #{adbkDeleteDt}
 			,adbk_delete_at = #{adbkDeleteAt}
-		WHERE adbk_wrter_id == #{adbkWrterId}
+ 		WHERE adbk_id = #{adbkId}
 	</update>
+	
 </mapper>

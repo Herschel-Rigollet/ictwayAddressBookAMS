@@ -18,11 +18,11 @@ import egovframework.ictway.yja.service.AdrITAVO;
 /**
  * 주소록 정보 관리를 위한 구현 클래스
  * @author ICTWAY
- * @since 2024.12.29
+ * @since 2024.01.04
  * @version 1.0
  * @Modification
  * <pre>
- *2024.12.29 / 유지애 / 최초생성
+ *2024.01.04 / 유지애 / 최초생성
  * </pre>
  * @see
  */
@@ -33,7 +33,7 @@ public class AdrITAServiceImpl implements AdrITAService {
     private AdrITADAO adrITADAO;
 	
 	/** yja-adrITAIdGnrService */
-	@Resource(name="kjk-adrIdGnrService")
+	@Resource(name="yja-adrITAIdGnrService")
 	private EgovIdGnrService idgenService;
 	
 	@Override
@@ -60,7 +60,7 @@ public class AdrITAServiceImpl implements AdrITAService {
 	@Override
 	public String registAdrITAAct(AdrITAVO adrITAVO) throws FdlException, Exception {
 		//고유아이디 셋팅
-		Long uniqIdLong = Long.parseLong(idgenService.getNextStringId());
+		Long uniqIdLong = idgenService.getNextLongId();
 		adrITAVO.setAdbkSn(uniqIdLong);
 		String uniqId = Long.toString(uniqIdLong);
 		LoginVO user = (LoginVO) EgovUserDetailsHelper.getAuthenticatedUser();

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="AdrGMADAO">
-	<resultMap id="addressInfoVO" type="egovframework.ictway.yhj.service.AddressInfoVO">
+<mapper namespace="adrGMADAO">
+	<resultMap id="adrGMAVO" type="egovframework.ictway.yhj.service.AdrGMAVO">
 		<result property="adbkId" column="adbk_id"/>	<!-- 주소록번호 -->
 		<result property="userNm" column="user_nm"/>	<!-- 사용자명칭 -->
 		<result property="brthdy" column="brthdy"/>	<!-- 생년월일 -->
@@ -31,7 +31,7 @@
 
 
 
-	<select id="selectAddressInfoList" parameterType="egovframework.ictway.yhj.service.AddressInfoVO" resultType="egovMap">
+	<select id="selectAdrGMAList" parameterType="egovframework.ictway.yhj.service.AdrGMAVO" resultType="egovMap">
 		SELECT
 			adbk_id
 			,user_nm
@@ -52,23 +52,41 @@
 			,bkmk_at
 			,adbk_creat_dt
 		FROM yhj.address_info
-		WHERE delete_at = 'N' 
+		WHERE adbk_delete_at = 'N'
+		<if test="searchKeyword != '' and searchKeyword != null">
+			<choose>
+				<when test="searchCondition == 0">
+					AND user_nm like CONCAT('%', #{searchKeyword}, '%')
+				</when>
+				
+				<when test="searchCondition == 1">
+					AND emailaddr like CONCAT('%', #{searchKeyword}, '%')
+				</when>
+			</choose>
+		</if>
+		<if test="searchKeyword == '' or searchKeyword == null">
+			<choose>
+				<when test="searchCondition == 2">
+					AND bkmk_at = 'Y'
+				</when>
+			</choose>
+		</if>
 		ORDER BY 1 DESC
 		LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
 	</select>
 
 
 
-	<select id="selectAddressInfoListCnt" parameterType="egovframework.ictway.yhj.service.AddressInfoVO" resultType="java.lang.Integer">
+	<select id="selectAdrGMAListCnt" parameterType="egovframework.ictway.yhj.service.AdrGMAVO" resultType="java.lang.Integer">
 		SELECT
 			COUNT(*)
 		FROM yhj.address_info
-		WHERE delete_at = 'N' 
+		WHERE adbk_delete_at = 'N' 
 	</select>
 
 
 
-	<select id="selectAddressInfoDetail" parameterType="egovframework.ictway.yhj.service.AddressInfoVO" resultMap="addressInfoVO">
+	<select id="selectAdrGMADetail" parameterType="egovframework.ictway.yhj.service.AdrGMAVO" resultMap="adrGMAVO">
 		SELECT
 			adbk_id
 			,user_nm
@@ -91,12 +109,12 @@
 			,adbk_wrter_id
 		FROM yhj.address_info
 		WHERE adbk_id = #{adbkId}
-		AND delete_at = 'N'
+		AND adbk_delete_at = 'N'
 	</select>
 
 
 
-	<insert id="insertAddressInfoAct" parameterType="egovframework.ictway.yhj.service.AddressInfoVO">
+	<insert id="insertAdrGMAAct" parameterType="egovframework.ictway.yhj.service.AdrGMAVO">
 		INSERT INTO yhj.address_info (
 			adbk_id
 			,user_nm
@@ -114,6 +132,7 @@
 			,cmpny_nm
 			,cmpny_team_nm
 			,cmpny_clsf_nm
+			,bkmk_at
 			,adbk_creat_dt
 			,adbk_wrter_id
 		) VALUES(
@@ -133,6 +152,7 @@
 			,#{cmpnyNm}
 			,#{cmpnyTeamNm}
 			,#{cmpnyClsfNm}
+			,#{bkmkAt}
 			,now()
 			,#{adbkWrterId}
 		)
@@ -140,20 +160,18 @@
 
 
 
-	<update id="updateAddressInfoAct" parameterType="egovframework.ictway.yhj.service.AddressInfoVO">
+	<update id="updateAdrGMAAct" parameterType="egovframework.ictway.yhj.service.AdrGMAVO">
 		UPDATE yhj.address_info
 		SET 
-			user_nm = #{userNm}
-			,brthdy = #{brthdy}
-			,sexdstn_code = #{sexdstnCode}
+			sexdstn_code = #{sexdstnCode}
 			,adres = #{adres}
 			,detail_adres = #{detailAdres}
 			,mbtlnum = #{mbtlnum}
 			,emailaddr = #{emailaddr}
 			,memo = #{memo}
-			,photo_flpth = #{photoFlpth}
+<!-- 			,photo_flpth = #{photoFlpth}
 			,photo_file_nm = #{photoFileNm}
-			,photo_extsn_nm = #{photoExtsnNm}
+			,photo_extsn_nm = #{photoExtsnNm} -->
 			,adres_group_code = #{adresGroupCode}
 			,cmpny_nm = #{cmpnyNm}
 			,cmpny_team_nm = #{cmpnyTeamNm}
@@ -164,7 +182,7 @@
 		WHERE adbk_id = #{adbkId}
 	</update>
 	
-		<update id="deleteAddressInfoAct" parameterType="egovframework.ictway.yhj.service.AddressInfoVO">
+		<update id="deleteAdrGMAAct" parameterType="egovframework.ictway.yhj.service.AdrGMAVO">
 		UPDATE yhj.address_info
 		SET 
 			adbk_dltr_id = #{adbkDltrId}

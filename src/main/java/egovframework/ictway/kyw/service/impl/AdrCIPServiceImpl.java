@@ -12,6 +12,7 @@ import org.egovframe.rte.fdl.security.userdetails.util.EgovUserDetailsHelper;
 import org.springframework.stereotype.Service;
 
 import egovframework.com.cmm.LoginVO;
+import egovframework.ictway.kjk.service.AdrVO;
 import egovframework.ictway.kyw.service.AdrCIPService;
 import egovframework.ictway.kyw.service.AdrCIPVO;
 
@@ -32,8 +33,8 @@ public class AdrCIPServiceImpl implements AdrCIPService {
 	@Resource(name = "adrCIPDAO")
     private AdrCIPDAO adrCIPDAO;
 	
-	/** kjk-adrIdGnrService */
-	@Resource(name="kjk-adrIdGnrService")
+	/** kyw-adrCIPIdGnrService */
+	@Resource(name="kyw-adrCIPIdGnrService")
 	private EgovIdGnrService idgenService;
 	
 	@Override
@@ -53,7 +54,7 @@ public class AdrCIPServiceImpl implements AdrCIPService {
 
 	@Override
 	public AdrCIPVO selectAdrCIPDetail(AdrCIPVO adrCIPVO) throws Exception {
-		// TODO 상세조회에 대한 조건 로직 추가
+		adrCIPVO.getAdbkFrstWrterNm();
 		return adrCIPDAO.selectAdrCIPDetail(adrCIPVO);
 	}
 
@@ -66,22 +67,33 @@ public class AdrCIPServiceImpl implements AdrCIPService {
 		LoginVO user = (LoginVO) EgovUserDetailsHelper.getAuthenticatedUser();
 		adrCIPVO.setAdbkFrstWrterId(user.getUniqId());
 		
-		adrCIPDAO.insertAdrCIPAct(adrCIPVO);
+		adrCIPDAO.registAdrCIPAct(adrCIPVO);
 		return uniqId;
 	}
 
 	@Override
-	public void updateAdrCIPAct(AdrCIPVO adrCIPVO) throws Exception {
+	public Boolean updateAdrCIPAct(AdrCIPVO adrCIPVO) throws Exception {
+		boolean result = false;
+		
 		LoginVO user = (LoginVO) EgovUserDetailsHelper.getAuthenticatedUser();
-		adrCIPVO.setAdbkLastUpdusrId(user.getUniqId());
-		adrCIPDAO.updateAdrCIPAct(adrCIPVO);
+		AdrCIPVO resultVO = adrCIPDAO.selectAdrCIPDetail(adrCIPVO);
+		Boolean isAdmin = EgovUserDetailsHelper.getAuthorities().contains("ROLE_ADMIN");
+		
+		if(resultVO.getAdbkFrstWrterId().equals(user.getUniqId()) || isAdmin) { //등록자 또는 관리자만 action할 수 있는 로직
+			adrCIPVO.setAdbkLastUpdusrId(user.getUniqId());
+			adrCIPDAO.updateAdrCIPAct(adrCIPVO);
+			result = true;
+		}
+		
+		return result;
 	}
 
 	@Override
 	public void deleteAdrCIPAct(AdrCIPVO adrCIPVO) throws Exception {
+		
 		LoginVO user = (LoginVO) EgovUserDetailsHelper.getAuthenticatedUser();
-		adrCIPVO.setAdbkLastUpdusrId(user.getUniqId());
+		AdrCIPVO resultVO = adrCIPDAO.selectAdrCIPDetail(adrCIPVO);
 		adrCIPDAO.deleteAdrCIPAct(adrCIPVO);
+		
 	}
-
 }
